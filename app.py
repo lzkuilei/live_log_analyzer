@@ -96,9 +96,11 @@ def to_excel_bytes(sheets: dict):
 st.sidebar.header("📁 文件上传")
 uploaded_file = st.sidebar.file_uploader("选择直播日志TXT文件", type=["txt"], key="log_file")
 
-# 返回主页：清除已上传文件，回到格式说明页
+# 返回主页：删除上传控件的 state（不能直接赋值）并刷新，回到格式说明页
 if st.sidebar.button("🏠 返回主页（清除已上传日志）", key="back_home"):
-    st.session_state["log_file"] = None
+    st.session_state.pop("log_file", None)
+    for k in ["anchor", "date", "session", "export_scope"]:
+        st.session_state.pop(k, None)
     st.rerun()
 
 if uploaded_file is None:
