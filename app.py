@@ -94,12 +94,18 @@ def to_excel_bytes(sheets: dict):
     return buf.getvalue()
 
 
-st.sidebar.header("📁 文件上传")
-uploaded_file = st.sidebar.file_uploader("选择直播日志TXT文件", type=["txt"], key="log_file")
+if "uploader_version" not in st.session_state:
+    st.session_state["uploader_version"] = 0
 
-# 返回主页：删除上传控件的 state（不能直接赋值）并刷新，回到格式说明页
+st.sidebar.header("📁 文件上传")
+uploaded_file = st.sidebar.file_uploader(
+    "选择直播日志TXT文件", type=["txt"],
+    key=f"log_file_{st.session_state['uploader_version']}",
+)
+
+# 返回主页：给上传控件换新 key 彻底重建，并清空筛选状态
 if st.sidebar.button("🏠 返回主页（清除已上传日志）", key="back_home"):
-    st.session_state.pop("log_file", None)
+    st.session_state["uploader_version"] += 1
     for k in ["anchor", "date", "session", "export_scope"]:
         st.session_state.pop(k, None)
     st.rerun()
