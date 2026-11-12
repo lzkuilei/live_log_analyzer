@@ -98,6 +98,7 @@ def build(stage: Path):
         "--collect-all", "streamlit",
         "--collect-all", "plotly",
         "--collect-all", "openpyxl",
+        "--collect-all", "reportlab",
         "--collect-all", "altair",
         # 数据文件
         "--add-data", f"{stage / 'app.enc'}{os.pathsep}.",
