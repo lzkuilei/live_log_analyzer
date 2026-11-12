@@ -15,12 +15,13 @@ from plotly.subplots import make_subplots
 import streamlit as st
 
 from analyzer import parse_live_log, build_dataframe, detect_key_events
-from pdf_export import pdf_single_session, pdf_session_compare, pdf_period_analysis
+from pdf_export import (pdf_single_session, pdf_session_compare, pdf_period_analysis,
+                        _fmt_hms, _fmt_text, _is_missing)
 
 st.set_page_config(page_title="好好好用的直播日志分析工具", page_icon="📊", layout="wide")
 st.title("📊 好好好用的直播日志分析工具")
 st.divider()
-APP_VERSION = "v1.0.3 · 2026-11-12 16:53 构建"
+APP_VERSION = "v1.0.4 · 2026-11-12 修复：导出 PDF 遇到未下播场次不再崩溃"
 
 
 metrics_cfg = [
@@ -180,11 +181,11 @@ if df_filtered.empty:
 
 
 def fmt_time(v):
-    return v.strftime('%Y-%m-%d %H:%M:%S') if v is not None and not pd.isna(v) else '无数据'
+    return v.strftime('%Y-%m-%d %H:%M:%S') if not _is_missing(v) and hasattr(v, 'strftime') else '无数据'
 
 
 def fmt_hm(v):
-    return v.strftime('%H:%M') if v is not None and not pd.isna(v) else '进行中'
+    return v.strftime('%H:%M') if not _is_missing(v) and hasattr(v, 'strftime') else '进行中'
 
 
 def _session_row(s_df):
@@ -340,7 +341,7 @@ with tab_single:
     if events:
         with st.expander(f"⚡ 检测到 {len(events)} 个关键事件（人数骤增/骤降）", expanded=False):
             ev_df = pd.DataFrame(
-                [{"时间": t.strftime('%H:%M:%S'), "类型": k, "前值": p, "后值": c}
+                [{"时间": _fmt_hms(t), "类型": k, "前值": p, "后值": c}
                  for t, k, p, c in events]
             )
             st.dataframe(ev_df, use_container_width=True)
@@ -422,7 +423,7 @@ with tab_export:
             "场次汇总": pd.DataFrame([_session_row(df_filtered)]).drop(columns=["场次号"]),
             "原始数据": df_filtered.drop(columns=["场次号"]),
             "关键事件": pd.DataFrame(
-                [{"时间": t.strftime('%Y-%m-%d %H:%M:%S'), "类型": k, "前值": p, "后值": c}
+                [{"时间": _fmt_hms(t, '未知时间'), "类型": k, "前值": p, "后值": c}
                  for t, k, p, c in detect_key_events(df_filtered)]
             ),
         }

@@ -52,8 +52,44 @@ FOOT_STYLE = ParagraphStyle("foot", fontName="SimHei", fontSize=8,
                             textColor=colors.HexColor("#aaaaaa"), alignment=1, spaceBefore=10)
 
 
-def _fmt(v):
-    return v.strftime('%Y-%m-%d %H:%M:%S') if v is not None and not pd.isna(v) else "无数据"
+def _is_missing(v) -> bool:
+    """判断缺失值：None / NaT / NaN / 空字符串。
+
+    pd.isna 对非标量会返回数组，直接 not 会抛 ValueError，这里统一收敛为布尔值。
+    """
+    if v is None:
+        return True
+    if isinstance(v, str):
+        return not v.strip()
+    try:
+        return bool(pd.isna(v))
+    except (TypeError, ValueError):
+        return False
+
+
+def _fmt(v, empty="无数据"):
+    """时间戳格式化；缺失值返回 empty（不再触发 NaTType does not support strftime）。"""
+    if _is_missing(v):
+        return empty
+    if hasattr(v, "strftime"):
+        return v.strftime('%Y-%m-%d %H:%M:%S')
+    return str(v)
+
+
+def _fmt_text(v, empty="无数据"):
+    """普通文本格式化：缺失值返回 empty，避免 NaN 被打印成 'nan'。"""
+    if _is_missing(v):
+        return empty
+    return str(v)
+
+
+def _fmt_hms(v, empty="--:--:--"):
+    """时分秒格式化，缺失值返回 empty。"""
+    if _is_missing(v):
+        return empty
+    if hasattr(v, "strftime"):
+        return v.strftime('%H:%M:%S')
+    return str(v)
 
 
 def _doc(title: str, landscape_mode: bool = False):
@@ -142,10 +178,10 @@ def pdf_single_session(anchor, date_label, session_label, info, metric_rows,
 
     story.append(Paragraph("一、基础信息", H2_STYLE))
     story.append(_table(pd.DataFrame(
-        [{"项目": "房间号", "内容": info["房间号"]},
-         {"项目": "开播时间", "内容": _fmt(info["开播时间"])},
-         {"项目": "下播时间", "内容": _fmt(info["下播时间"])},
-         {"项目": "直播时长", "内容": info["直播时长"] or "无数据"}])))
+        [{"项目": "房间号", "内容": _fmt_text(info.get("房间号"), "无数据")},
+         {"项目": "开播时间", "内容": _fmt(info.get("开播时间"))},
+         {"项目": "下播时间", "内容": _fmt(info.get("下播时间"), "无数据（仍在播）")},
+         {"项目": "直播时长", "内容": _fmt_text(info.get("直播时长"), "无数据")}])))
 
     story.append(Paragraph("二、核心指标", H2_STYLE))
     story.append(_table(pd.DataFrame(metric_rows, columns=["指标", "数值", "备注"])))
@@ -156,7 +192,7 @@ def pdf_single_session(anchor, date_label, session_label, info, metric_rows,
     story.append(Paragraph("四、关键事件（在线人数骤增/骤降）", H2_STYLE))
     if event_rows:
         story.append(_table(pd.DataFrame(
-            [{"时间": t.strftime('%H:%M:%S'), "类型": k, "前值": p, "后值": c}
+            [{"时间": _fmt_hms(t), "类型": k, "前值": p, "后值": c}
              for t, k, p, c in event_rows])))
     else:
         story.append(Paragraph("本场未检测到关键事件。", H2_STYLE))
