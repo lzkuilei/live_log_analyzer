@@ -43,13 +43,14 @@ st.markdown(
     /* info 卡片柔化 */
     [data-testid="stInfo"] { border-radius: 10px; }
 
-    /* 侧边栏深色主题 */
-    [data-testid="stSidebar"] { background: #1D3557; }
-    [data-testid="stSidebar"] * { color: #F1FAEE !important; }
-    [data-testid="stSidebar"] hr { border-color: rgba(241, 250, 238, 0.2) !important; }
+    /* 侧边栏浅色点缀 */
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3 {
+        color: #E63946;
+        letter-spacing: 0.5px;
+    }
     [data-testid="stSidebar"] [data-testid="stExpander"] {
-        background: rgba(241, 250, 238, 0.06);
-        border: 1px solid rgba(241, 250, 238, 0.15);
+        border: 1px solid #E9ECEF;
         border-radius: 10px;
     }
 
