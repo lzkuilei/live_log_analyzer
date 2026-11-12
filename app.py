@@ -200,14 +200,94 @@ def _session_row(s_df):
     }
 
 
+def period_of(dt):
+    if dt is None or pd.isna(dt):
+        return "未知"
+    h = dt.hour
+    if 6 <= h < 12:
+        return "早场 (6-12点)"
+    if 12 <= h < 18:
+        return "下午场 (12-18点)"
+    if 18 <= h < 24:
+        return "晚场 (18-24点)"
+    return "深夜场 (0-6点)"
+
+
+# ---- 各页面共用数据（提前计算，供展示与 PDF 导出共享） ----
+first = df_filtered.iloc[0]
+new_fans_final = int(df_filtered['新增粉丝数'].iloc[-1])
+view_final = int(df_filtered['总观看人数'].iloc[-1])
+like_final = int(df_filtered['点赞数'].iloc[-1])
+events = detect_key_events(df_filtered)
+
+cmp_df = pd.DataFrame([_session_row(df_anchor[df_anchor['场次号'] == sid])
+                       for sid in sorted(df_anchor['场次号'].unique())]).drop(columns=["场次号"])
+best = cmp_df.loc[cmp_df['峰值在线'].idxmax()]
+cmp_best_note = f"🏆 峰值在线最高的一场：{best['日期']} {best['开播']}开播（峰值 {best['峰值在线']}，涨粉 {best['涨粉']}）"
+
+all_rows = []
+for sid in sorted(df['场次号'].unique()):
+    s_df = df[df['场次号'] == sid]
+    row = _session_row(s_df)
+    row["时段"] = period_of(s_df.iloc[0]['开播时间'])
+    row["主播"] = s_df.iloc[0]['主播名']
+    all_rows.append(row)
+all_df = pd.DataFrame(all_rows)
+
+period_stat = all_df.groupby("时段").agg(
+    场次数=("峰值在线", "size"),
+    平均峰值在线=("峰值在线", "mean"),
+    平均总观看=("总观看", "mean"),
+    平均点赞=("点赞", "mean"),
+    平均涨粉=("涨粉", "mean"),
+    最高峰值=("峰值在线", "max"),
+).round(1).reset_index()
+_order = ["早场 (6-12点)", "下午场 (12-18点)", "晚场 (18-24点)", "深夜场 (0-6点)", "未知"]
+period_stat["_o"] = period_stat["时段"].map({p: i for i, p in enumerate(_order)})
+period_stat = period_stat.sort_values("_o").drop(columns="_o")
+stat_valid = period_stat[period_stat["时段"] != "未知"]
+period_best_note = ""
+if not stat_valid.empty:
+    _bp = stat_valid.loc[stat_valid["平均峰值在线"].idxmax()]
+    period_best_note = f"💡 当前数据中「{_bp['时段']}」平均峰值在线最高（{_bp['平均峰值在线']}），共 {_bp['场次数']} 场。"
+
 tab_single, tab_compare, tab_period, tab_export = st.tabs(
     ["📊 单场分析", "📋 场次对比", "⏰ 时段分析", "⬇️ 导出报告"]
 )
 
 # ==================== 单场分析 ====================
 with tab_single:
-    st.subheader(f"🎙️ 主播：{selected_anchor} | 直播日期：{selected_date} | {selected_session_label}")
-    first = df_filtered.iloc[0]
+    tcol1, tcol2 = st.columns([4, 1])
+    with tcol1:
+        st.subheader(f"🎙️ 主播：{selected_anchor} | 直播日期：{selected_date} | {selected_session_label}")
+    with tcol2:
+        st.download_button(
+            "⬇️ 导出 PDF",
+            data=pdf_single_session(
+                selected_anchor, str(selected_date), selected_session_label,
+                info={"房间号": first['房间号'], "开播时间": first['开播时间'],
+                      "下播时间": first['下播时间'], "直播时长": first['直播时长']},
+                metric_rows=[
+                    ("在线人数峰值", int(df_filtered['在线人数'].max()), f"均值 {df_filtered['在线人数'].mean():.1f}"),
+                    ("总观看人数最终值", view_final,
+                     f"增量 {view_final - int(df_filtered['总观看人数'].iloc[0])}"),
+                    ("点赞数最终值", like_final,
+                     f"增量 {like_final - int(df_filtered['点赞数'].iloc[0])}"),
+                    ("新增粉丝数累计", new_fans_final, f"峰值 {int(df_filtered['新增粉丝数'].max())}"),
+                ],
+                funnel_rows=[
+                    ("总观看", view_final, "—"),
+                    ("点赞", like_final, f"{like_final / view_final * 100:.1f}%" if view_final else "—"),
+                    ("涨粉", new_fans_final, f"{new_fans_final / view_final * 100:.2f}%" if view_final else "—"),
+                ],
+                event_rows=events,
+                df_x=df_filtered,
+            ),
+            file_name=f"单场分析_{selected_anchor}_{selected_date}.pdf",
+            mime="application/pdf",
+            key="pdf_single",
+            use_container_width=True,
+        )
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.info(f"**房间号**：{first['房间号']}")
@@ -220,7 +300,6 @@ with tab_single:
 
     # 核心指标
     st.subheader("📈 核心指标统计")
-    new_fans_final = int(df_filtered['新增粉丝数'].iloc[-1])
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("在线人数峰值", int(df_filtered['在线人数'].max()), f"均值 {df_filtered['在线人数'].mean():.1f}")
@@ -235,8 +314,6 @@ with tab_single:
 
     # 粉丝转化漏斗
     st.subheader("🔻 粉丝转化漏斗")
-    view_final = int(df_filtered['总观看人数'].iloc[-1])
-    like_final = int(df_filtered['点赞数'].iloc[-1])
     c1, c2, c3 = st.columns(3)
     with c1:
         st.metric("总观看", view_final)
@@ -251,7 +328,6 @@ with tab_single:
 
     # 波形图 + 关键事件
     st.subheader("📊 核心指标波形趋势图")
-    events = detect_key_events(df_filtered)
     if events:
         with st.expander(f"⚡ 检测到 {len(events)} 个关键事件（人数骤增/骤降）", expanded=False):
             ev_df = pd.DataFrame(
@@ -264,42 +340,20 @@ with tab_single:
     with st.expander("📋 查看筛选后原始日志数据（前50行）", expanded=False):
         st.dataframe(df_filtered.head(50), use_container_width=True)
 
-    # 导出本页 PDF
-    first_row = df_filtered.iloc[0]
-    st.download_button(
-        "⬇️ 导出单场分析报告 PDF",
-        data=pdf_single_session(
-            selected_anchor, str(selected_date), selected_session_label,
-            info={"房间号": first_row['房间号'], "开播时间": first_row['开播时间'],
-                  "下播时间": first_row['下播时间'], "直播时长": first_row['直播时长']},
-            metric_rows=[
-                ("在线人数峰值", int(df_filtered['在线人数'].max()), f"均值 {df_filtered['在线人数'].mean():.1f}"),
-                ("总观看人数最终值", int(df_filtered['总观看人数'].iloc[-1]),
-                 f"增量 {int(df_filtered['总观看人数'].iloc[-1] - df_filtered['总观看人数'].iloc[0])}"),
-                ("点赞数最终值", int(df_filtered['点赞数'].iloc[-1]),
-                 f"增量 {int(df_filtered['点赞数'].iloc[-1] - df_filtered['点赞数'].iloc[0])}"),
-                ("新增粉丝数累计", new_fans_final, f"峰值 {int(df_filtered['新增粉丝数'].max())}"),
-            ],
-            funnel_rows=[
-                ("总观看", view_final, "—"),
-                ("点赞", like_final, f"{like_final / view_final * 100:.1f}%" if view_final else "—"),
-                ("涨粉", new_fans_final, f"{new_fans_final / view_final * 100:.2f}%" if view_final else "—"),
-            ],
-            event_rows=events,
-        ),
-        file_name=f"单场分析_{selected_anchor}_{selected_date}.pdf",
-        mime="application/pdf",
-        key="pdf_single",
-    )
-
 # ==================== 场次对比 ====================
 with tab_compare:
-    st.subheader(f"📋 主播 {selected_anchor} 全部场次对比")
-    anchor_sessions = []
-    for sid in sorted(df_anchor['场次号'].unique()):
-        s_df = df_anchor[df_anchor['场次号'] == sid]
-        anchor_sessions.append(_session_row(s_df))
-    cmp_df = pd.DataFrame(anchor_sessions).drop(columns=["场次号"])
+    tcol1, tcol2 = st.columns([4, 1])
+    with tcol1:
+        st.subheader(f"📋 主播 {selected_anchor} 全部场次对比")
+    with tcol2:
+        st.download_button(
+            "⬇️ 导出 PDF",
+            data=pdf_session_compare(selected_anchor, cmp_df, cmp_best_note),
+            file_name=f"场次对比_{selected_anchor}.pdf",
+            mime="application/pdf",
+            key="pdf_compare",
+            use_container_width=True,
+        )
     st.dataframe(cmp_df, use_container_width=True)
 
     # 峰值在线对比柱状图
@@ -315,56 +369,25 @@ with tab_compare:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    best = cmp_df.loc[cmp_df['峰值在线'].idxmax()]
-    best_note = f"🏆 峰值在线最高的一场：{best['日期']} {best['开播']}开播（峰值 {best['峰值在线']}，涨粉 {best['涨粉']}）"
+    best_note = cmp_best_note
     st.success(best_note)
-
-    st.download_button(
-        "⬇️ 导出场次对比报告 PDF",
-        data=pdf_session_compare(selected_anchor, cmp_df, best_note),
-        file_name=f"场次对比_{selected_anchor}.pdf",
-        mime="application/pdf",
-        key="pdf_compare",
-    )
 
 # ==================== 时段分析 ====================
 with tab_period:
-    st.subheader("⏰ 开播时段效果分析")
+    tcol1, tcol2 = st.columns([4, 1])
+    with tcol1:
+        st.subheader("⏰ 开播时段效果分析")
+    with tcol2:
+        st.download_button(
+            "⬇️ 导出 PDF",
+            data=pdf_period_analysis(selected_anchor, period_stat, period_best_note),
+            file_name=f"时段分析_{selected_anchor}.pdf",
+            mime="application/pdf",
+            key="pdf_period",
+            use_container_width=True,
+        )
     st.caption("把所有场次按开播时间归入时段，比较各时段的平均表现，回答「几点开播收益最高」。")
 
-    def period_of(dt):
-        if dt is None or pd.isna(dt):
-            return "未知"
-        h = dt.hour
-        if 6 <= h < 12:
-            return "早场 (6-12点)"
-        if 12 <= h < 18:
-            return "下午场 (12-18点)"
-        if 18 <= h < 24:
-            return "晚场 (18-24点)"
-        return "深夜场 (0-6点)"
-
-    all_rows = []
-    for sid in sorted(df['场次号'].unique()):
-        s_df = df[df['场次号'] == sid]
-        row = _session_row(s_df)
-        start = s_df.iloc[0]['开播时间']
-        row["时段"] = period_of(start)
-        row["主播"] = s_df.iloc[0]['主播名']
-        all_rows.append(row)
-    all_df = pd.DataFrame(all_rows)
-
-    period_stat = all_df.groupby("时段").agg(
-        场次数=("峰值在线", "size"),
-        平均峰值在线=("峰值在线", "mean"),
-        平均总观看=("总观看", "mean"),
-        平均点赞=("点赞", "mean"),
-        平均涨粉=("涨粉", "mean"),
-        最高峰值=("峰值在线", "max"),
-    ).round(1).reset_index()
-    order = ["早场 (6-12点)", "下午场 (12-18点)", "晚场 (18-24点)", "深夜场 (0-6点)", "未知"]
-    period_stat["_o"] = period_stat["时段"].map({p: i for i, p in enumerate(order)})
-    period_stat = period_stat.sort_values("_o").drop(columns="_o")
     st.dataframe(period_stat, use_container_width=True)
 
     fig = go.Figure()
@@ -374,22 +397,11 @@ with tab_period:
     st.plotly_chart(fig, use_container_width=True)
 
     stat_valid = period_stat[period_stat["时段"] != "未知"]
-    best_note = ""
     if not stat_valid.empty:
-        best_p = stat_valid.loc[stat_valid["平均峰值在线"].idxmax()]
-        best_note = f"💡 当前数据中「{best_p['时段']}」平均峰值在线最高（{best_p['平均峰值在线']}），共 {best_p['场次数']} 场。"
-        st.info(best_note)
+        st.info(period_best_note)
 
     with st.expander("查看全部场次明细", expanded=False):
         st.dataframe(all_df.drop(columns=["场次号"]), use_container_width=True)
-
-    st.download_button(
-        "⬇️ 导出时段分析报告 PDF",
-        data=pdf_period_analysis(selected_anchor, period_stat, best_note),
-        file_name=f"时段分析_{selected_anchor}.pdf",
-        mime="application/pdf",
-        key="pdf_period",
-    )
 
 # ==================== 导出报告 ====================
 with tab_export:
