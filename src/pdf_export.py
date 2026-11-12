@@ -73,9 +73,10 @@ def _embed_image(pdf: FPDF, caption: str, png_bytes: bytes):
 def _footer(pdf: FPDF, note: str):
     pdf.set_font("SimHei", size=9)
     if note:
-        pdf.multi_cell(0, 6, note)
+        pdf.multi_cell(0, 6, note, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_x(pdf.l_margin)  # 无论前面内容如何，页脚都从左边界开始
     pdf.set_text_color(120, 120, 120)
-    pdf.cell(0, 6, f"由 {APP_NAME} 生成", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 6, f"由 {APP_NAME} 生成", new_x="LMARGIN", new_y="NEXT", align="C")
     pdf.set_text_color(0, 0, 0)
 
 
