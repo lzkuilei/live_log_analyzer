@@ -49,6 +49,8 @@ def build_figure(df_x, anchor_name, events=None):
         fig.update_yaxes(title_text=name, row=r, col=c)
     if events:
         for t, kind, prev, cur in events:
+            # pandas Timestamp 与 plotly add_vline 不兼容，转成原生 datetime
+            t = t.to_pydatetime() if hasattr(t, "to_pydatetime") else t
             for r, c in [(1, 1), (1, 2), (2, 1), (2, 2)]:
                 fig.add_vline(
                     x=t, line_width=1, line_dash="dot",
