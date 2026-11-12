@@ -79,14 +79,15 @@ df_day = df[
     (df['主播名'] == selected_anchor) & (df['直播日期'] == selected_date)
 ].reset_index(drop=True)
 
-# 场次选项：该主播当天的每一场（含跨天未结束的场次）
+# 场次选项：该主播当天的每一场，按开播时间顺序编号为当天第几场
 all_option = "全部场次"
 session_labels = {}
-for sid in sorted(df_day['场次号'].unique()):
+day_sessions = sorted(df_day['场次号'].unique(), key=lambda sid: df_day[df_day['场次号'] == sid].iloc[0]['开播时间'])
+for n, sid in enumerate(day_sessions, start=1):
     s_row = df_day[df_day['场次号'] == sid].iloc[0]
     start_t = s_row['开播时间'].strftime('%H:%M') if s_row['开播时间'] is not None and not pd.isna(s_row['开播时间']) else '--:--'
     end_t = s_row['下播时间'].strftime('%H:%M') if s_row['下播时间'] is not None and not pd.isna(s_row['下播时间']) else '进行中'
-    session_labels[f"第{sid + 1}场（{start_t} – {end_t}）"] = sid
+    session_labels[f"第{n}场（{start_t} – {end_t}）"] = sid
 
 selected_session_label = st.sidebar.selectbox(
     "选择场次", [all_option] + list(session_labels.keys()), key="session"

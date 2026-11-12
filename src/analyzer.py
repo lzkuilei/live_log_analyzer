@@ -66,11 +66,12 @@ def parse_live_log(text: str):
             m = pattern_start.search(line)
             if not m:
                 continue
+            anchor = m.group(1)
+            # 同主播已有进行中的场（还没等到下播线）→ 视为断线重连，忽略重复开播
+            if anchor in open_by_anchor:
+                continue
             tm = pattern_line_time.match(line)
             start_dt = datetime.strptime(tm.group(1), '%Y-%m-%d %H:%M:%S') if tm else None
-            anchor = m.group(1)
-            # 上一场还没等到下播线就直接再开播 → 按断层规则结束上一场
-            close_current(anchor)
             s = _new_session(anchor, m.group(2), start_dt)
             sessions.append(s)
             open_by_anchor[anchor] = s
