@@ -15,6 +15,7 @@ from plotly.subplots import make_subplots
 import streamlit as st
 
 from analyzer import parse_live_log, build_dataframe, detect_key_events
+from pdf_export import pdf_single_session, pdf_session_compare, pdf_period_analysis
 
 st.set_page_config(page_title="好好好用的直播日志分析工具", page_icon="📊", layout="wide")
 st.title("📊 好好好用的直播日志分析工具")
@@ -263,6 +264,34 @@ with tab_single:
     with st.expander("📋 查看筛选后原始日志数据（前50行）", expanded=False):
         st.dataframe(df_filtered.head(50), use_container_width=True)
 
+    # 导出本页 PDF
+    first_row = df_filtered.iloc[0]
+    st.download_button(
+        "⬇️ 导出单场分析报告 PDF",
+        data=pdf_single_session(
+            selected_anchor, str(selected_date), selected_session_label,
+            info={"房间号": first_row['房间号'], "开播时间": first_row['开播时间'],
+                  "下播时间": first_row['下播时间'], "直播时长": first_row['直播时长']},
+            metric_rows=[
+                ("在线人数峰值", int(df_filtered['在线人数'].max()), f"均值 {df_filtered['在线人数'].mean():.1f}"),
+                ("总观看人数最终值", int(df_filtered['总观看人数'].iloc[-1]),
+                 f"增量 {int(df_filtered['总观看人数'].iloc[-1] - df_filtered['总观看人数'].iloc[0])}"),
+                ("点赞数最终值", int(df_filtered['点赞数'].iloc[-1]),
+                 f"增量 {int(df_filtered['点赞数'].iloc[-1] - df_filtered['点赞数'].iloc[0])}"),
+                ("新增粉丝数累计", new_fans_final, f"峰值 {int(df_filtered['新增粉丝数'].max())}"),
+            ],
+            funnel_rows=[
+                ("总观看", view_final, "—"),
+                ("点赞", like_final, f"{like_final / view_final * 100:.1f}%" if view_final else "—"),
+                ("涨粉", new_fans_final, f"{new_fans_final / view_final * 100:.2f}%" if view_final else "—"),
+            ],
+            event_rows=events,
+        ),
+        file_name=f"单场分析_{selected_anchor}_{selected_date}.pdf",
+        mime="application/pdf",
+        key="pdf_single",
+    )
+
 # ==================== 场次对比 ====================
 with tab_compare:
     st.subheader(f"📋 主播 {selected_anchor} 全部场次对比")
@@ -287,7 +316,16 @@ with tab_compare:
     st.plotly_chart(fig, use_container_width=True)
 
     best = cmp_df.loc[cmp_df['峰值在线'].idxmax()]
-    st.success(f"🏆 峰值在线最高的一场：{best['日期']} {best['开播']}开播（峰值 {best['峰值在线']}，涨粉 {best['涨粉']}）")
+    best_note = f"🏆 峰值在线最高的一场：{best['日期']} {best['开播']}开播（峰值 {best['峰值在线']}，涨粉 {best['涨粉']}）"
+    st.success(best_note)
+
+    st.download_button(
+        "⬇️ 导出场次对比报告 PDF",
+        data=pdf_session_compare(selected_anchor, cmp_df, best_note),
+        file_name=f"场次对比_{selected_anchor}.pdf",
+        mime="application/pdf",
+        key="pdf_compare",
+    )
 
 # ==================== 时段分析 ====================
 with tab_period:
@@ -336,12 +374,22 @@ with tab_period:
     st.plotly_chart(fig, use_container_width=True)
 
     stat_valid = period_stat[period_stat["时段"] != "未知"]
+    best_note = ""
     if not stat_valid.empty:
         best_p = stat_valid.loc[stat_valid["平均峰值在线"].idxmax()]
-        st.info(f"💡 当前数据中「{best_p['时段']}」平均峰值在线最高（{best_p['平均峰值在线']}），共 {best_p['场次数']} 场。")
+        best_note = f"💡 当前数据中「{best_p['时段']}」平均峰值在线最高（{best_p['平均峰值在线']}），共 {best_p['场次数']} 场。"
+        st.info(best_note)
 
     with st.expander("查看全部场次明细", expanded=False):
         st.dataframe(all_df.drop(columns=["场次号"]), use_container_width=True)
+
+    st.download_button(
+        "⬇️ 导出时段分析报告 PDF",
+        data=pdf_period_analysis(selected_anchor, period_stat, best_note),
+        file_name=f"时段分析_{selected_anchor}.pdf",
+        mime="application/pdf",
+        key="pdf_period",
+    )
 
 # ==================== 导出报告 ====================
 with tab_export:
