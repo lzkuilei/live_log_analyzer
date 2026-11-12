@@ -144,3 +144,28 @@ def build_dataframe(data):
     if not df.empty:
         df = df.sort_values("日志时间").reset_index(drop=True)
     return df
+
+
+def detect_key_events(df_session, col="在线人数", pct_threshold=0.5, abs_min=5):
+    """检测单场直播中的关键事件（人数骤增/骤降）。
+
+    判定：相邻两条日志间变化幅度超过 pct_threshold，且绝对变化量
+    不小于 max(abs_min, 场内峰值的 5%)。
+    返回 [(时间, 类型, 前值, 后值), ...]
+    """
+    events = []
+    if df_session is None or len(df_session) < 2:
+        return events
+    values = df_session[col].tolist()
+    times = df_session["日志时间"].tolist()
+    peak = max(values) or 1
+    abs_threshold = max(abs_min, peak * 0.05)
+    for i in range(1, len(values)):
+        prev, cur = values[i - 1], values[i]
+        diff = cur - prev
+        if prev == 0:
+            continue
+        if abs(diff) / prev >= pct_threshold and abs(diff) >= abs_threshold:
+            kind = "骤增" if diff > 0 else "骤降"
+            events.append((times[i], kind, prev, cur))
+    return events

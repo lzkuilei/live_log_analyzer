@@ -72,3 +72,17 @@ assert len(df[(df['主播名'] == '阿花') & (df['场次号'] == s_hua2_id)]) =
 
 print("全部测试通过 ✔")
 print(df.groupby(['主播名', '直播日期']).agg(条数=('在线人数', 'size')).to_string())
+
+# ---- 关键事件检测 ----
+from analyzer import detect_key_events
+ev_df = build_dataframe([{
+    "日志时间": __import__("datetime").datetime(2026, 3, 30, h, 0),
+    "在线人数": v,
+    "总观看人数": v, "点赞数": 0, "新增粉丝数": 0,
+    "直播日期": None, "相对时间(分钟)": 0, "开播时间": None, "下播时间": None, "直播时长": None, "场次号": 0,
+} for h, v in [(10, 10), (11, 12), (12, 60), (13, 55), (14, 20)]])  # 10→12 骤增500%+; 55→20 骤降64%
+events = detect_key_events(ev_df)
+kinds = [k for _, k, _, _ in events]
+assert "骤增" in kinds and "骤降" in kinds, f"应同时检测到骤增与骤降: {events}"
+assert all(p > 0 for _, _, p, _ in events)
+print("关键事件检测通过 ✔", [(t.strftime('%H:%M'), k, p, c) for t, k, p, c in events])
