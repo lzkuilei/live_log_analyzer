@@ -49,15 +49,20 @@ def build_figure(df_x, anchor_name, events=None):
         fig.update_yaxes(title_text=name, row=r, col=c)
     if events:
         for t, kind, prev, cur in events:
-            # pandas Timestamp 与 plotly add_vline 不兼容，转成原生 datetime
             t = t.to_pydatetime() if hasattr(t, "to_pydatetime") else t
+            color = "#E63946" if kind == "骤增" else "#2A9D8F"
+            # plotly 的 add_vline 在日期轴上做标注会崩（int+datetime），
+            # 改用底层 add_shape + add_annotation 手动画线
             for r, c in [(1, 1), (1, 2), (2, 1), (2, 2)]:
-                fig.add_vline(
-                    x=t, line_width=1, line_dash="dot",
-                    line_color="#E63946" if kind == "骤增" else "#2A9D8F",
-                    annotation_text=f"{kind}", annotation_position="top",
+                fig.add_shape(
+                    type="line", x0=t, x1=t, y0=0, y1=1,
+                    yref="y domain", line_width=1, line_dash="dot", line_color=color,
                     row=r, col=c,
                 )
+            fig.add_annotation(
+                x=t, y=1, yref="y domain", text=kind, showarrow=False,
+                font=dict(size=10, color=color), row=1, col=1,
+            )
     fig.update_layout(
         height=700, showlegend=False,
         title=dict(text=f"主播{anchor_name} 直播指标趋势", font=dict(size=18)),
