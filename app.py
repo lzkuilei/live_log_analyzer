@@ -103,6 +103,14 @@ if st.sidebar.button("🏠 返回主页（清除已上传日志）", key="back_h
         st.session_state.pop(k, None)
     st.rerun()
 
+# 关于
+st.sidebar.divider()
+with st.sidebar.expander("ℹ️ 关于"):
+    st.markdown(
+        "工具作者：[好好好Tyn✰⋆⁺₊⋆](https://www.douyin.com/user/MS4wLjABAAAAB8-gPsEihGt8Q321hVQN-s-Qy86mZiRKDzlvl8jDP04)"  # noqa: E501
+    )
+    st.caption("点击名字可打开作者的抖音主页。")
+
 if uploaded_file is None:
     st.info("💡 请在左侧侧边栏**上传直播日志TXT文件**（格式与样本一致），工具将自动解析并生成分析报告")
     st.divider()
