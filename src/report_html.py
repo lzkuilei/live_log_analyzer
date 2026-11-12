@@ -111,6 +111,9 @@ def html_to_pdf_bytes(html: str) -> bytes:
             [str(edge), "--headless", "--disable-gpu",
              f"--print-to-pdf={pdf_path}",
              "--no-pdf-header-footer",
+             # 独立用户数据目录：避免与正在运行的 Edge 互相干扰导致打印被转交而失败
+             f"--user-data-dir={Path(tmp) / 'edgeprofile'}",
+             "--no-first-run", "--no-default-browser-check",
              html_path.resolve().as_uri()],
             check=True, timeout=60,
             creationflags=subprocess.CREATE_NO_WINDOW,
