@@ -20,6 +20,8 @@ from pdf_export import pdf_single_session, pdf_session_compare, pdf_period_analy
 st.set_page_config(page_title="好好好用的直播日志分析工具", page_icon="📊", layout="wide")
 st.title("📊 好好好用的直播日志分析工具")
 st.divider()
+APP_VERSION = "v1.0.3 · 2026-11-12 16:53 构建"
+
 
 metrics_cfg = [
     ("在线人数", "#E63946"),
@@ -112,6 +114,7 @@ if st.sidebar.button("🏠 返回主页（清除已上传日志）", key="back_h
 
 # 关于
 st.sidebar.divider()
+st.sidebar.caption(f"版本：{APP_VERSION}")
 with st.sidebar.expander("ℹ️ 关于"):
     st.markdown(
         "工具作者：[好好好Tyn✰⋆⁺₊⋆](https://www.douyin.com/user/MS4wLjABAAAAB8-gPsEihGt8Q321hVQN-s-Qy86mZiRKDzlvl8jDP04)"  # noqa: E501
