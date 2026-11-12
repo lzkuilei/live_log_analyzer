@@ -102,7 +102,9 @@ def parse_live_log(text: str):
                 "日志时间": log_time,
                 "主播名": anchor,
                 "房间号": room,
-                "session_idx": len(sessions) - 1,
+                # 必须用该主播当前所在场次的序号；用 len(sessions)-1 会把
+                # 其他主播刚开播的场次错当成数据归属（跨主播交错时串场）
+                "session_idx": sessions.index(s),
                 "在线人数": int(m.group(3)),
                 "总观看人数": int(m.group(4)),
                 "点赞数": int(m.group(5)),
