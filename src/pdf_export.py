@@ -53,7 +53,7 @@ FOOT_STYLE = ParagraphStyle("foot", fontName="SimHei", fontSize=8,
 
 
 def _fmt(v):
-    return v.strftime('%Y-%m-%d %H:%M:%S') if v is not None else "无数据"
+    return v.strftime('%Y-%m-%d %H:%M:%S') if v is not None and not pd.isna(v) else "无数据"
 
 
 def _doc(title: str, landscape_mode: bool = False):

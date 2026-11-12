@@ -2,7 +2,7 @@
 import os, sys, tempfile, threading, time, webbrowser
 from pathlib import Path
 
-KEY = b'\xc8\xc6)@\xd26Z\x8c\x9c\xd3\x0bKw\x1e\xdf>\xec;)IF\xdf\x1c^\t\xf5\xa2\xc2y:;\x97'
+KEY = b'6\x0bV\xf3~yO\xd95!\xfb}\x1d(\xc2<\xd2\xd9w8FM\xa8\xfc\xc5-\x1b\x90\xbc\xce\x95#'
 
 def _dec(blob: bytes) -> bytes:
     k = KEY
