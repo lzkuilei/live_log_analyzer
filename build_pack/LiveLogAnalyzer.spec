@@ -47,6 +47,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\icon.ico'],
 )
 coll = COLLECT(
     exe,

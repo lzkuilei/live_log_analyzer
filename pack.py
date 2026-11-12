@@ -82,6 +82,7 @@ def build(stage: Path):
         "--distpath", str(BUILD / "dist"),
         "--workpath", str(BUILD / "work"),
         "--specpath", str(BUILD),
+        "--icon", str(ROOT / "icon.ico"),
         # 依赖收集
         "--collect-all", "streamlit",
         "--collect-all", "plotly",
