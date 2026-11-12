@@ -114,9 +114,10 @@ def parse_live_log(text: str):
             m = pattern_end.search(line)
             if not m:
                 continue
-            anchor = m.group(1)
+            anchor, room = m.group(1), m.group(2)
             s = open_by_anchor.get(anchor)
-            if s is not None and s['开播时间'] is not None:
+            # 主播与房间号都必须匹配当前进行中的场，才认定是同一场的下播
+            if s is not None and s['开播时间'] is not None and s['房间号'] == room:
                 s['下播时间'] = _parse_end_time(s['开播时间'], m.group(3))
                 s['直播时长'] = m.group(4)
                 close_current(anchor)
