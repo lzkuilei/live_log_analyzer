@@ -16,6 +16,13 @@ st.set_page_config(page_title="直播日志分析工具", page_icon="📊", layo
 st.title("📊 直播日志分析工具")
 st.divider()
 
+metrics_cfg = [
+    ("在线人数", "#E63946"),
+    ("总观看人数", "#457B9D"),
+    ("点赞数", "#2A9D8F"),
+    ("新增粉丝数", "#F9C74F"),
+]
+
 
 def build_figure(df_x, anchor_name):
     """四指标交互波形图（悬停可看具体时间与数值）。"""
@@ -36,22 +43,6 @@ def build_figure(df_x, anchor_name):
         hovermode="x unified",
     )
     return fig
-
-metrics_cfg = [
-    ("在线人数", "#E63946"),
-    ("总观看人数", "#457B9D"),
-    ("点赞数", "#2A9D8F"),
-    ("新增粉丝数", "#F9C74F"),
-]
-st.plotly_chart(build_figure(df_filtered, selected_anchor), use_container_width=True)
-
-metrics_cfg = [
-    ("在线人数", "#E63946"),
-    ("总观看人数", "#457B9D"),
-    ("点赞数", "#2A9D8F"),
-    ("新增粉丝数", "#F9C74F"),
-]
-st.plotly_chart(build_figure(df_filtered), use_container_width=True)
 
 
 st.sidebar.header("📁 文件上传")
@@ -80,6 +71,7 @@ df = build_dataframe(data)
 # ---------------------- 筛选条件 ----------------------
 st.sidebar.header("🔍 筛选条件")
 selected_anchor = st.sidebar.selectbox("选择主播", df['主播名'].unique(), key="anchor")
+# 日期选项只显示当前主播有数据的日期
 df_anchor = df[df['主播名'] == selected_anchor]
 unique_dates = sorted(df_anchor['直播日期'].unique())
 selected_date = st.sidebar.selectbox("选择直播日期", unique_dates, key="date")
@@ -120,7 +112,9 @@ with col4:
     st.metric("新增粉丝数累计", new_fans_final, f"峰值 {int(df_filtered['新增粉丝数'].max())}")
 st.divider()
 
-
+# ---------------------- 波形趋势图（交互式，悬停查看数值） ----------------------
+st.subheader("📊 核心指标波形趋势图")
+st.plotly_chart(build_figure(df_filtered, selected_anchor), use_container_width=True)
 
 # ---------------------- 原始数据 ----------------------
 with st.expander("📋 查看筛选后原始日志数据（前50行）", expanded=False):
