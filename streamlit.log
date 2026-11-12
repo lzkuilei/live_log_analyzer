@@ -5,38 +5,3 @@
   Network URL: http://10.0.20.7:8899
   External URL: http://123.126.22.150:8899
 
-2026-11-12 15:52:17.977 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
-2026-11-12 15:52:17.999 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
-2026-11-12 15:52:19.331 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
-2026-11-12 15:52:19.367 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
-2026-11-12 15:52:20.539 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
-2026-11-12 15:52:20.544 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
-2026-11-12 15:52:20.547 Please replace `use_container_width` with `width`.
-
-`use_container_width` will be removed after 2025-12-31.
-
-For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
