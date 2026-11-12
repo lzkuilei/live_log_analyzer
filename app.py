@@ -18,7 +18,68 @@ from analyzer import parse_live_log, build_dataframe, detect_key_events
 from pdf_export import pdf_single_session, pdf_session_compare, pdf_period_analysis
 
 st.set_page_config(page_title="好好好用的直播日志分析工具", page_icon="📊", layout="wide")
-st.title("📊 好好好用的直播日志分析工具")
+
+# ---------------------- 全局样式 ----------------------
+st.markdown(
+    """
+    <style>
+    /* 主区域留白与字体 */
+    .block-container { padding-top: 1.2rem; padding-bottom: 2rem; max-width: 1400px; }
+    html, body, [class*="css"] { font-family: "Microsoft YaHei", "SimHei", sans-serif; }
+
+    /* 页面主标题 */
+    h1 { letter-spacing: 1px; }
+
+    /* 指标卡片化 */
+    [data-testid="stMetric"] {
+        background: #FFFFFF;
+        border: 1px solid #E9ECEF;
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 1px 3px rgba(29, 53, 87, 0.06);
+    }
+    [data-testid="stMetricLabel"] p { font-size: 0.9rem; color: #457B9D; font-weight: 600; }
+
+    /* info 卡片柔化 */
+    [data-testid="stInfo"] { border-radius: 10px; }
+
+    /* 侧边栏深色主题 */
+    [data-testid="stSidebar"] { background: #1D3557; }
+    [data-testid="stSidebar"] * { color: #F1FAEE !important; }
+    [data-testid="stSidebar"] hr { border-color: rgba(241, 250, 238, 0.2) !important; }
+    [data-testid="stSidebar"] [data-testid="stExpander"] {
+        background: rgba(241, 250, 238, 0.06);
+        border: 1px solid rgba(241, 250, 238, 0.15);
+        border-radius: 10px;
+    }
+
+    /* 按钮统一风格 */
+    .stButton > button, [data-testid="stDownloadButton"] > button {
+        border-radius: 8px;
+        border: 1px solid #E63946;
+        color: #E63946;
+        font-weight: 600;
+        background: #FFFFFF;
+    }
+    .stButton > button:hover, [data-testid="stDownloadButton"] > button:hover {
+        background: #E63946;
+        color: #FFFFFF;
+        border-color: #E63946;
+    }
+
+    /* 标签页加粗高亮 */
+    .stTabs [data-baseweb="tab"] { font-size: 1rem; padding: 8px 18px; }
+    .stTabs [aria-selected="true"] { font-weight: 700; color: #E63946 !important; }
+
+    /* 隐藏顶部菜单与页脚 */
+    #MainMenu, footer, [data-testid="stToolbar"] { visibility: hidden; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.title("📊 好好用用的直播日志分析工具")
+st.caption("上传直播日志 TXT，自动解析场次，提供单场分析、场次对比、时段分析与报告导出")
 st.divider()
 
 metrics_cfg = [
