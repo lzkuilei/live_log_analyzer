@@ -2,7 +2,7 @@
 import os, sys, tempfile, threading, time, webbrowser
 from pathlib import Path
 
-KEY = b'\x0f|x-/1\xa1\nz\x95\x97\xbe\x88\x98\n\xda~\xc1\xf9;\xc9\x9d\xb4\x0b\x0b1\xa0\xbes\xc5^m'
+KEY = b'p\x16\xaft\xeb\xe0\xa3\xccu\x14\x81R\xab\\\x10\xd4qU\x0f\xebX\x8f*\xf0%\xd7e\x03#\x9aN\x80'
 
 def _dec(blob: bytes) -> bytes:
     k = KEY
@@ -35,7 +35,18 @@ def main():
                 "--browser.gatherUsageStats", "false"]
     threading.Timer(3.0, lambda: webbrowser.open(f"http://127.0.0.1:{port}")).start()
     print(f"服务端口: {port}（关闭本窗口即退出程序）")
-    stcli.main()
+    # 服务意外退出时自动重启（最多连续 5 次，避免死循环）
+    restarts = 0
+    while restarts < 5:
+        try:
+            stcli.main()
+        except Exception as e:
+            print("服务异常退出:", e)
+        if restarts >= 4:
+            break
+        restarts += 1
+        print(f"正在自动重启服务... (第 {restarts} 次)")
+        time.sleep(2)
 
 if __name__ == "__main__":
     main()

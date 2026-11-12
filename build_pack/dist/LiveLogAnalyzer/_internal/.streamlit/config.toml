@@ -5,5 +5,8 @@ backgroundColor = "#FAFAFA"
 secondaryBackgroundColor = "#FFFFFF"
 textColor = "#1D3557"
 
+[server]
+fileWatcherType = "none"
+
 [browser]
 gatherUsageStats = false
