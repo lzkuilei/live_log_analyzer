@@ -330,7 +330,7 @@ with tab_period:
 # ==================== 导出报告 ====================
 with tab_export:
     st.subheader("⬇️ 导出分析报告（Excel）")
-    scope = st.radio("导出范围", ["当前场次", "当前主播当日全部场次", "全部数据"], key="export_scope")
+    scope = st.radio("导出范围", ["当前场次", "当前主播当日全部场次", "当前主播全部数据"], key="export_scope")
 
     if scope == "当前场次":
         sheets = {
@@ -350,11 +350,14 @@ with tab_export:
         }
         fname = f"直播分析_{selected_anchor}_{selected_date}_全部场次.xlsx"
     else:
+        # 只导出当前主播的全部场次，不含其他主播
+        anchor_all_df = all_df[all_df['主播'] == selected_anchor]
+        anchor_ids = anchor_all_df['场次号'].tolist()
         sheets = {
-            "场次汇总": all_df.drop(columns=["场次号"]),
-            "原始数据": df.drop(columns=["场次号"]),
+            "场次汇总": anchor_all_df.drop(columns=["场次号"]),
+            "原始数据": df[df['场次号'].isin(anchor_ids)].drop(columns=["场次号"]),
         }
-        fname = f"直播分析_全部数据.xlsx"
+        fname = f"直播分析_{selected_anchor}_全部数据.xlsx"
 
     st.caption(f"将导出：{'、'.join(sheets.keys())}")
     if st.button("生成并下载 Excel", key="download"):
