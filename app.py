@@ -16,8 +16,8 @@ import streamlit as st
 
 from analyzer import parse_live_log, build_dataframe, detect_key_events
 
-st.set_page_config(page_title="直播日志分析工具", page_icon="📊", layout="wide")
-st.title("📊 直播日志分析工具")
+st.set_page_config(page_title="好好好用的直播日志分析工具", page_icon="📊", layout="wide")
+st.title("📊 好好好用的直播日志分析工具")
 st.divider()
 
 metrics_cfg = [
