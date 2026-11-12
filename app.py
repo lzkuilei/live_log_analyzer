@@ -86,15 +86,20 @@ if df_filtered.empty:
 # ---------------------- 直播基础信息 ----------------------
 st.subheader(f"🎙️ 主播：{selected_anchor} | 直播日期：{selected_date}")
 first = df_filtered.iloc[0]
+
+def _fmt_time(v):
+    """时间列里的 None/NaT 显示为“无数据”。"""
+    return v.strftime('%Y-%m-%d %H:%M:%S') if v is not None and not pd.isna(v) else '无数据'
+
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.info(f"**房间号**：{first['房间号']}")
 with col2:
-    st.info(f"**开播时间**：{first['开播时间'].strftime('%Y-%m-%d %H:%M:%S') if first['开播时间'] is not None else '无数据'}")
+    st.info(f"**开播时间**：{_fmt_time(first['开播时间'])}")
 with col3:
-    st.info(f"**下播时间**：{first['下播时间'].strftime('%Y-%m-%d %H:%M:%S') if first['下播时间'] is not None else '无数据'}")
+    st.info(f"**下播时间**：{_fmt_time(first['下播时间'])}")
 with col4:
-    st.info(f"**直播时长**：{first['直播时长'] or '无数据'}")
+    st.info(f"**直播时长**：{first['直播时长'] if first['直播时长'] is not None and not pd.isna(first['直播时长']) else '无数据'}")
 
 # ---------------------- 核心指标统计 ----------------------
 st.subheader("📈 核心指标统计")
