@@ -122,8 +122,9 @@ def parse_live_log(text: str):
 
     # 按所属场次回填：日期归属开播那天，跨天不拆分
     for row in data:
-        s = sessions[row.pop("session_idx")]
+        s = sessions[row["session_idx"]]
         start = s["开播时间"]
+        row["场次号"] = row.pop("session_idx")
         row["直播日期"] = start.date() if start else row["日志时间"].date()
         row["相对时间(分钟)"] = (
             (row["日志时间"] - start).total_seconds() / 60 if start else None

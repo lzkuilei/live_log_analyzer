@@ -75,16 +75,33 @@ selected_anchor = st.sidebar.selectbox("选择主播", df['主播名'].unique(),
 df_anchor = df[df['主播名'] == selected_anchor]
 unique_dates = sorted(df_anchor['直播日期'].unique())
 selected_date = st.sidebar.selectbox("选择直播日期", unique_dates, key="date")
-df_filtered = df[
+df_day = df[
     (df['主播名'] == selected_anchor) & (df['直播日期'] == selected_date)
 ].reset_index(drop=True)
+
+# 场次选项：该主播当天的每一场（含跨天未结束的场次）
+all_option = "全部场次"
+session_labels = {}
+for sid in sorted(df_day['场次号'].unique()):
+    s_row = df_day[df_day['场次号'] == sid].iloc[0]
+    start_t = s_row['开播时间'].strftime('%H:%M') if s_row['开播时间'] is not None and not pd.isna(s_row['开播时间']) else '--:--'
+    end_t = s_row['下播时间'].strftime('%H:%M') if s_row['下播时间'] is not None and not pd.isna(s_row['下播时间']) else '进行中'
+    session_labels[f"第{sid + 1}场（{start_t} – {end_t}）"] = sid
+
+selected_session_label = st.sidebar.selectbox(
+    "选择场次", [all_option] + list(session_labels.keys()), key="session"
+)
+if selected_session_label == all_option:
+    df_filtered = df_day
+else:
+    df_filtered = df_day[df_day['场次号'] == session_labels[selected_session_label]].reset_index(drop=True)
 
 if df_filtered.empty:
     st.warning("该主播在此日期没有数据")
     st.stop()
 
 # ---------------------- 直播基础信息 ----------------------
-st.subheader(f"🎙️ 主播：{selected_anchor} | 直播日期：{selected_date}")
+st.subheader(f"🎙️ 主播：{selected_anchor} | 直播日期：{selected_date} | {selected_session_label}")
 first = df_filtered.iloc[0]
 
 def _fmt_time(v):
