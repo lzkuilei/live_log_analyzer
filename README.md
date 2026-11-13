@@ -45,6 +45,8 @@ python pack.py
 
 产物在 `build_pack/dist/LiveLogAnalyzer/`。源码以混淆形式打包进 exe。
 
+> 📋 打包前后的检查清单、流程说明和历史踩坑记录见 **[PACKAGING.md](PACKAGING.md)**，每次重新打包前建议通读一遍。
+
 ## 测试
 
 ```bash
