@@ -37,6 +37,8 @@ def prepare() -> Path:
         (stage / "src" / f"{py.stem}.enc").write_bytes(header(obfuscate(py.read_bytes())))
     # .streamlit 主题配置
     shutil.copytree(ROOT / ".streamlit", stage / ".streamlit")
+    if (ROOT / "assets").exists():
+        shutil.copytree(ROOT / "assets", stage / "assets")
 
     # 解密加载器：运行时把加密文件还原到临时目录
     loader = r'''
@@ -115,6 +117,7 @@ def build(stage: Path):
         "--add-data", f"{stage / 'app.enc'}{os.pathsep}.",
         "--add-data", f"{stage / 'src'}{os.pathsep}src",
         "--add-data", f"{stage / '.streamlit'}{os.pathsep}.streamlit",
+        "--add-data", f"{stage / 'assets'}{os.pathsep}assets",
         # 隐式导入
         "--hidden-import", "pandas",
         "--hidden-import", "matplotlib",

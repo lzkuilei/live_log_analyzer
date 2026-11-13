@@ -18,8 +18,16 @@ from analyzer import parse_live_log, build_dataframe, detect_key_events
 from pdf_export import (pdf_single_session, pdf_session_compare, pdf_period_analysis,
                         _fmt_hms, _fmt_text, _is_missing)
 
-st.set_page_config(page_title="好好好用的直播日志分析工具", page_icon="📊", layout="wide")
-st.title("📊 好好好用的直播日志分析工具")
+ICON_PATH = Path(__file__).parent / "assets" / "icon.png"
+ICON_B64 = base64.b64encode(ICON_PATH.read_bytes()).decode()
+
+st.set_page_config(page_title="好好好用的直播日志分析工具", page_icon=str(ICON_PATH), layout="wide")
+st.markdown(
+    f'<h1 style="display:flex;align-items:center;gap:14px;">'
+    f'<img src="data:image/png;base64,{ICON_B64}" style="width:52px;border-radius:10px;">'
+    f'好好好用的直播日志分析工具</h1>',
+    unsafe_allow_html=True,
+)
 st.divider()
 APP_VERSION = "v1.0.4 · 2026-11-12 修复：导出 PDF 遇到未下播场次不再崩溃"
 
