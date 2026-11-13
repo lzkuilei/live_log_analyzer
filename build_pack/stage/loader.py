@@ -2,7 +2,7 @@
 import os, sys, tempfile, threading, time, webbrowser
 from pathlib import Path
 
-KEY = b'G\x9d\xb5GnLW\xbdD\x93\xfd\xc7(L\x80\xa1?3\xc4\x1aXziWb\xe9\xc4j\xc4\r\x1c\xe0'
+KEY = b'\xa4\xf0\xfb[!\x0c\x82\xe5\xe0p38\x9f\x88$s\x82\xfc\xfa\xa12\xc6\x85d\xe0\xb5\xa7xe\x16.5'
 
 def _dec(blob: bytes) -> bytes:
     k = KEY
@@ -24,6 +24,8 @@ def main():
     runtime = Path(tempfile.mkdtemp(prefix="lla_"))
     (runtime / "app.py").write_bytes(_dec((base / "app.enc").read_bytes()))
     (runtime / "src").mkdir()
+    import shutil as _sh
+    _sh.copy(base / "CHANGELOG.md", runtime / "CHANGELOG.md")
     for enc in (base / "src").glob("*.enc"):
         (runtime / "src" / f"{enc.stem}.py").write_bytes(_dec(enc.read_bytes()))
 

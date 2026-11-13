@@ -30,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.divider()
-APP_VERSION = "v1.0.5"
+APP_VERSION = "v1.0.6"
 try:
     CHANGELOG_TEXT = (Path(__file__).parent / "CHANGELOG.md").read_text(encoding="utf-8")
     CHANGELOG_TEXT = CHANGELOG_TEXT.replace("# 更新记录", "").strip()
@@ -121,7 +121,7 @@ uploaded_file = st.sidebar.file_uploader(
 )
 
 # 返回主页：给上传控件换新 key 彻底重建，并清空筛选状态
-if st.sidebar.button("🏠 返回主页（清除已上传日志）", key="back_home"):
+if st.sidebar.button("🏠 返回主页", key="back_home"):
     st.session_state["uploader_version"] += 1
     for k in ["anchor", "date", "session", "export_scope"]:
         st.session_state.pop(k, None)
@@ -130,7 +130,7 @@ if st.sidebar.button("🏠 返回主页（清除已上传日志）", key="back_h
 # 关于
 st.sidebar.divider()
 st.sidebar.caption(f"{APP_VERSION}")
-with st.sidebar.expander("📜 更新记录（点击展开）"):
+with st.sidebar.expander("📜 更新记录"):
     st.markdown(CHANGELOG_TEXT, unsafe_allow_html=True)
 with st.sidebar.expander("ℹ️ 关于"):
     st.markdown(
