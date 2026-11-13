@@ -29,8 +29,35 @@ st.markdown(
     f'好好好用的直播日志分析工具</h1>',
     unsafe_allow_html=True,
 )
+st.markdown(
+    """
+    <style>
+    /* 文件上传控件中文化 */
+    [data-testid="stFileUploaderDropzoneInstructions"] { visibility: hidden; height: 0 !important; margin: 0 !important; }
+    [data-testid="stFileUploaderDropzone"]::before {
+        content: "将文件拖到这里";
+        display: block; text-align: center; font-size: 15px;
+        color: #1d3557; padding-top: 22px;
+    }
+    [data-testid="stFileUploaderDropzone"]::after {
+        content: "单个文件最大 200MB · 支持 TXT";
+        display: block; text-align: center; font-size: 12px;
+        color: #8a94a6; padding-bottom: 10px;
+    }
+    [data-testid="stFileUploaderDropzoneButton"] { position: relative; }
+    [data-testid="stFileUploaderDropzoneButton"] p { visibility: hidden; font-size: 0; }
+    [data-testid="stFileUploaderDropzoneButton"]::after {
+        content: "选择文件";
+        position: absolute; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; color: #1d3557; font-weight: 600;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 st.divider()
-APP_VERSION = "v1.0.8"
+APP_VERSION = "v1.0.9"
 try:
     CHANGELOG_TEXT = (Path(__file__).parent / "CHANGELOG.md").read_text(encoding="utf-8")
     CHANGELOG_TEXT = CHANGELOG_TEXT.replace("# 更新记录", "").strip()
