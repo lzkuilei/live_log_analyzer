@@ -2,7 +2,7 @@
 import os, sys, tempfile, threading, time, webbrowser
 from pathlib import Path
 
-KEY = b'O"\xdf\xe6D-\xd2\xea\x90N\xdd\xff4\xe4\xbb\xafa\xea\xf0j\xc2\x10%\x88\xc6N\xc3\xa8\xcap\xa43'
+KEY = b'\xc0:\x9d\x0cuYf\x04\x15\x99vsM\xa7\xc4v\xaf\x93?\x1a\xe2\xd2gmr\x11\xfa\xb0\x03\xa1I\x9a'
 
 def _dec(blob: bytes) -> bytes:
     k = KEY
@@ -26,6 +26,8 @@ def main():
     (runtime / "src").mkdir()
     import shutil as _sh
     _sh.copy(base / "CHANGELOG.md", runtime / "CHANGELOG.md")
+    if (base / "assets").exists():
+        _sh.copytree(base / "assets", runtime / "assets")
     for enc in (base / "src").glob("*.enc"):
         (runtime / "src" / f"{enc.stem}.py").write_bytes(_dec(enc.read_bytes()))
 

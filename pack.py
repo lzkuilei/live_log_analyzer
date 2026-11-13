@@ -70,6 +70,8 @@ def main():
     (runtime / "src").mkdir()
     import shutil as _sh
     _sh.copy(base / "CHANGELOG.md", runtime / "CHANGELOG.md")
+    if (base / "assets").exists():
+        _sh.copytree(base / "assets", runtime / "assets")
     for enc in (base / "src").glob("*.enc"):
         (runtime / "src" / f"{enc.stem}.py").write_bytes(_dec(enc.read_bytes()))
 
