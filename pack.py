@@ -33,6 +33,7 @@ def prepare() -> Path:
 
     # 加密 app.py 与 src/*.py
     (stage / "app.enc").write_bytes(header(obfuscate((ROOT / "app.py").read_bytes())))
+    shutil.copy(ROOT / "CHANGELOG.md", stage / "CHANGELOG.md")
     for py in (ROOT / "src").glob("*.py"):
         (stage / "src" / f"{py.stem}.enc").write_bytes(header(obfuscate(py.read_bytes())))
     # .streamlit 主题配置
@@ -67,6 +68,8 @@ def main():
     runtime = Path(tempfile.mkdtemp(prefix="lla_"))
     (runtime / "app.py").write_bytes(_dec((base / "app.enc").read_bytes()))
     (runtime / "src").mkdir()
+    import shutil as _sh
+    _sh.copy(base / "CHANGELOG.md", runtime / "CHANGELOG.md")
     for enc in (base / "src").glob("*.enc"):
         (runtime / "src" / f"{enc.stem}.py").write_bytes(_dec(enc.read_bytes()))
 
@@ -118,6 +121,7 @@ def build(stage: Path):
         "--add-data", f"{stage / 'src'}{os.pathsep}src",
         "--add-data", f"{stage / '.streamlit'}{os.pathsep}.streamlit",
         "--add-data", f"{stage / 'assets'}{os.pathsep}assets",
+        "--add-data", f"{stage / 'CHANGELOG.md'}{os.pathsep}.",
         # 隐式导入
         "--hidden-import", "pandas",
         "--hidden-import", "matplotlib",

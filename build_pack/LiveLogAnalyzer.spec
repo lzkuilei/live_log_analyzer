@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\build_pack\\stage\\app.enc', '.'), ('C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\build_pack\\stage\\src', 'src'), ('C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\build_pack\\stage\\.streamlit', '.streamlit')]
+datas = [('C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\build_pack\\stage\\app.enc', '.'), ('C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\build_pack\\stage\\src', 'src'), ('C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\build_pack\\stage\\.streamlit', '.streamlit'), ('C:\\Users\\Luna\\AppData\\Roaming\\Cindy\\owners\\fcb0728ecdfaf54ecc33\\bots\\cindy-default\\workspace\\live_log_analyzer\\build_pack\\stage\\assets', 'assets')]
 binaries = []
 hiddenimports = ['pandas', 'matplotlib', 'openpyxl', 'fpdf2']
 tmp_ret = collect_all('streamlit')

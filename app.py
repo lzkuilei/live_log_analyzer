@@ -30,7 +30,12 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.divider()
-APP_VERSION = "v1.0.4 · 2026-11-12 修复：导出 PDF 遇到未下播场次不再崩溃"
+APP_VERSION = "v1.0.5"
+try:
+    CHANGELOG_TEXT = (Path(__file__).parent / "CHANGELOG.md").read_text(encoding="utf-8")
+    CHANGELOG_TEXT = CHANGELOG_TEXT.replace("# 更新记录", "").strip()
+except Exception:
+    CHANGELOG_TEXT = "未找到更新记录文件"
 
 
 metrics_cfg = [
@@ -124,7 +129,9 @@ if st.sidebar.button("🏠 返回主页（清除已上传日志）", key="back_h
 
 # 关于
 st.sidebar.divider()
-st.sidebar.caption(f"版本：{APP_VERSION}")
+st.sidebar.caption(f"{APP_VERSION}")
+with st.sidebar.expander("📜 更新记录（点击展开）"):
+    st.markdown(CHANGELOG_TEXT, unsafe_allow_html=True)
 with st.sidebar.expander("ℹ️ 关于"):
     st.markdown(
         "工具作者：[好好好Tyn✰⋆⁺₊⋆](https://www.douyin.com/user/MS4wLjABAAAAB8-gPsEihGt8Q321hVQN-s-Qy86mZiRKDzlvl8jDP04)"  # noqa: E501
