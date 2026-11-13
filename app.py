@@ -30,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.divider()
-APP_VERSION = "v1.0.6"
+APP_VERSION = "v1.0.7"
 try:
     CHANGELOG_TEXT = (Path(__file__).parent / "CHANGELOG.md").read_text(encoding="utf-8")
     CHANGELOG_TEXT = CHANGELOG_TEXT.replace("# 更新记录", "").strip()
@@ -127,16 +127,16 @@ if st.sidebar.button("🏠 返回主页", key="back_home"):
         st.session_state.pop(k, None)
     st.rerun()
 
-# 关于
-st.sidebar.divider()
-st.sidebar.caption(f"{APP_VERSION}")
-with st.sidebar.expander("📜 更新记录"):
+# 版本 / 更新记录 / 关于（与返回主页按钮一致的样式）
+with st.sidebar.popover(f"ℹ️ {APP_VERSION}"):
     st.markdown(CHANGELOG_TEXT, unsafe_allow_html=True)
-with st.sidebar.expander("ℹ️ 关于"):
+with st.sidebar.popover("👤 关于"):
     st.markdown(
         "工具作者：[好好好Tyn✰⋆⁺₊⋆](https://www.douyin.com/user/MS4wLjABAAAAB8-gPsEihGt8Q321hVQN-s-Qy86mZiRKDzlvl8jDP04)"  # noqa: E501
     )
     st.caption("点击名字可打开作者的抖音主页。")
+
+st.sidebar.divider()
 
 if uploaded_file is None:
     st.info("💡 请在左侧侧边栏**上传直播日志TXT文件**（格式与样本一致），工具将自动解析并生成分析报告")
