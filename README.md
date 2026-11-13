@@ -23,9 +23,18 @@ streamlit run app.py
 
 直接双击 `LiveLogAnalyzer.exe`（需 `_internal` 文件夹在同一目录），约 5 秒后自动打开浏览器。
 
-- 端口自动选择（默认从 8501 起，被占用则顺延），控制台会显示实际端口
+- 端口自动选择（默认从 8501 起，被占用则顺延），控制台会显示实际端口，浏览器会自动打开正确地址
+- 端口被占用无需手动处理；如需固定端口，先 `set PORT=9000` 再运行 exe
 - 服务意外退出会自动重启（最多 5 次）
 - 分发时请把整个 `LiveLogAnalyzer` 文件夹一起拷贝，不要只拷 exe
+
+排查端口占用（可选）：
+
+```powershell
+netstat -ano | findstr :8501   # 查看 8501 被哪个进程占用（最后一列为 PID）
+tasklist | findstr 进程号       # 确认进程名称
+taskkill /PID 进程号 /F         # 确认是闲置程序后再结束
+```
 
 ## 日志格式
 
