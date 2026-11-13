@@ -3,6 +3,7 @@
 
 标签页：单场分析 / 场次对比 / 时段分析 / 导出报告
 """
+import base64
 import sys
 from io import BytesIO
 from pathlib import Path
